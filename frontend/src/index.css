@@ -1,0 +1,183 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base styles ──────────────────────────────────── */
+:root {
+  --gradient-primary: linear-gradient(135deg, #1d6ef1 0%, #338dfc 50%, #59b0ff 100%);
+  --gradient-danger: linear-gradient(135deg, #e11d48 0%, #f43f5e 50%, #fb7185 100%);
+  --gradient-success: linear-gradient(135deg, #16a34a 0%, #22c55e 50%, #4ade80 100%);
+  --gradient-dark: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --shadow-glow: 0 0 40px rgba(29, 110, 241, 0.15);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #f8fafc;
+  color: #1e293b;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─── Scrollbar ────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ─── Glass card effect ────────────────────────────── */
+@layer components {
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg;
+  }
+
+  .glass-card-dark {
+    @apply bg-surface-900/80 backdrop-blur-xl border border-surface-700/30 rounded-2xl shadow-lg;
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-primary);
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300
+           hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0
+           focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2;
+    background-image: var(--gradient-primary);
+  }
+
+  .btn-danger {
+    @apply px-6 py-3 rounded-xl font-semibold text-white transition-all duration-300
+           hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0
+           focus:outline-none focus:ring-2 focus:ring-danger-400 focus:ring-offset-2;
+    background-image: var(--gradient-danger);
+  }
+
+  .btn-outline {
+    @apply px-6 py-3 rounded-xl font-semibold border-2 border-primary-500 text-primary-600
+           transition-all duration-300 hover:bg-primary-50 hover:-translate-y-0.5
+           active:translate-y-0 focus:outline-none focus:ring-2
+           focus:ring-primary-400 focus:ring-offset-2;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border border-surface-200 bg-white
+           text-surface-900 placeholder-surface-400 transition-all duration-300
+           focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400
+           hover:border-surface-300;
+  }
+
+  .risk-badge-low {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold
+           bg-accent-100 text-accent-700 border border-accent-200;
+  }
+
+  .risk-badge-medium {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold
+           bg-amber-100 text-amber-700 border border-amber-200;
+  }
+
+  .risk-badge-high {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold
+           bg-danger-100 text-danger-700 border border-danger-200 animate-pulse-slow;
+  }
+}
+
+/* ─── Print Styles ─────────────────────────────────── */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  /* Base print resets for all pages */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* ── Single-page report (Results page) ── */
+  /* Lock to exactly one A4 page only when the Results report is printing */
+  html:has(.print-report),
+  html:has(.print-report) body {
+    height: 297mm !important;
+    max-height: 297mm !important;
+    overflow: hidden !important;
+  }
+
+  .print-report {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 210mm;
+    height: 297mm;
+    max-height: 297mm;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 10mm 14mm 10mm 14mm;
+    box-sizing: border-box;
+    z-index: 99999;
+    background: white;
+  }
+
+  .print-report > div:last-child {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: stretch;
+  }
+
+  .print-report > div:last-child > div {
+    flex: 1;
+  }
+
+  /* ── Multi-page history report ── */
+  html:has(.print-history),
+  html:has(.print-history) body {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  @page history {
+    size: A4 portrait;
+    margin: 15mm 14mm;
+  }
+
+  .print-history {
+    page: history;
+    display: block !important;
+    width: 100%;
+    background: white;
+    padding: 0;
+  }
+
+  .print-history .history-entry {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
