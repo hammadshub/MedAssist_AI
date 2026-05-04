@@ -45,7 +45,8 @@ export default function Login() {
                         <Stethoscope className="w-8 h-8 text-white" />
                     </div>
                     <h1 className="text-3xl font-bold font-display text-white">MedAssist AI</h1>
-                    <p className="text-surface-400 mt-1 text-sm">Intelligent Disease Identification System</p>
+                    <p className="text-surface-400 mt-1 text-sm">An Intelligent Decision-Support System for Early
+                        Disease Identification</p>
                 </div>
 
                 {/* Form card */}
