@@ -81,6 +81,22 @@ body {
            focus:ring-primary-400 focus:ring-offset-2;
   }
 
+  /* Smooth accordion open/close */
+  .accordion-grid {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.25s ease;
+  }
+  .accordion-grid.open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+  .accordion-grid > div {
+    overflow: hidden;
+  }
+
   .input-field {
     @apply w-full px-4 py-3 rounded-xl border border-surface-200 bg-white
            text-surface-900 placeholder-surface-400 transition-all duration-300
