@@ -52,6 +52,16 @@ def _load_model():
     return _model, _symptom_columns, _descriptions
 
 
+def _load_disease_symptoms():
+    """Load disease-symptom profiles from disease_symptoms.json for hybrid scoring."""
+    try:
+        ds_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "disease_symptoms.json")
+        with open(ds_path, "r") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
 def predict_diseases(matched_symptoms: list[str]) -> dict:
     """
     Run the ML model on a list of canonical symptom keys.
@@ -104,56 +114,76 @@ def predict_diseases(matched_symptoms: list[str]) -> dict:
     }
 
 
+
+
 def get_best_next_symptom(known_symptoms: list[str], absent_symptoms: list[str]) -> str | None:
-    """
-    Simulates adding each unasked symptom to pinpoint which one
-    increases the top predicted disease's confidence the most.
-    """
+    
     model, symptom_columns, _ = _load_model()
-    base_res = predict_diseases(known_symptoms)
-    if not base_res["predictions"]:
-        return None
-        
-    top_disease = base_res["predictions"][0]["disease"]
-    base_conf = base_res["predictions"][0]["confidence"]
-    
-    # Sometimes confidence might drop for the same disease if we pick irrelevant symptoms,
-    # we just want to find max positive increase.
-    best_symptom = None
-    max_conf_increase = 0.0
-    
-    class_labels = list(model.classes_)
-    if top_disease not in class_labels:
-        return None
-    top_disease_idx = class_labels.index(top_disease)
-    
-    # Prepare base boolean feature vector
+
+    # Current best confidence (for any disease) with known symptoms
+    base_probs = model.predict_proba(
+        [np.array([1 if col in known_symptoms else 0 for col in symptom_columns])]
+    )[0]
+    base_max_conf = float(np.max(base_probs)) * 100.0
+
+    # Filter candidate symptoms: only consider symptoms that belong
+    # to diseases whose profiles share at least one symptom with the
+    # user's known symptoms. This keeps questions contextually relevant.
+    disease_profiles = _load_disease_symptoms()
+    known_set = set(known_symptoms)
+
+    relevant_symptoms = set()
+    for disease_name, profile_symptoms in disease_profiles.items():
+        profile_set = set(profile_symptoms)
+        # Does this disease's profile contain ANY of the user's symptoms?
+        if profile_set & known_set:
+            # Yes — all of this disease's symptoms are fair game
+            relevant_symptoms.update(profile_set)
+
     base_feature_vector = [1 if col in known_symptoms else 0 for col in symptom_columns]
-    
+
+    best_symptom = None
+    best_increase = 0.0
+
     for i, sym in enumerate(symptom_columns):
         if sym in known_symptoms or sym in absent_symptoms:
             continue
-            
-        # Simulate having this symptom
+
+        # Only consider symptoms from related disease profiles
+        if relevant_symptoms and sym not in relevant_symptoms:
+            continue
+
+        # Simulate: "What if the user also has this symptom?"
         test_vector = list(base_feature_vector)
         test_vector[i] = 1
-        
-        # predict_proba returns array of arrays: [[p1, p2, p3...]]
+
         probabilities = model.predict_proba([test_vector])[0]
-        test_conf = float(probabilities[top_disease_idx]) * 100.0
-        
-        increase = test_conf - base_conf
-        if increase > max_conf_increase:
-            max_conf_increase = increase
+
+        # Check the best confidence for ANY disease with this
+        # symptom added — allows exploring alternative diagnoses
+        test_max_conf = float(np.max(probabilities)) * 100.0
+        increase = test_max_conf - base_max_conf
+
+        if increase > best_increase:
+            best_increase = increase
             best_symptom = sym
-            
-    # Fallback: if no single symptom robustly increases probability of the top disease,
-    # just pick the first unasked symptom that belongs to the top disease's known profile
-    # (Since we are using ML, sometimes adding just 1 symptom doesn't show huge impact due to tree structure)
-    # If no increase is found, just pick any unasked symptom.
-    if not best_symptom:
-        for sym in symptom_columns:
-            if sym not in known_symptoms and sym not in absent_symptoms:
-                return sym
-                
-    return best_symptom
+
+    if best_symptom:
+        return best_symptom
+
+    # ── Fallback: pick from related disease profiles directly ──
+    for disease_name, profile_symptoms in disease_profiles.items():
+        profile_set = set(profile_symptoms)
+        if profile_set & known_set:
+            for sym in profile_symptoms:
+                if sym not in known_symptoms and sym not in absent_symptoms and sym in symptom_columns:
+                    return sym
+
+    # ── Final fallback: any unasked symptom
+    for sym in symptom_columns:
+        if sym not in known_symptoms and sym not in absent_symptoms:
+            return sym
+
+    return None
+
+
