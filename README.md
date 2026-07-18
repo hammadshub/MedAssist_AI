@@ -26,7 +26,7 @@
 ## 🏗️ Tech Stack
 
 | Layer | Technology |
-|-------|-----------| 
+|-------|-----------|
 | **Frontend** | React, Vite, TailwindCSS, Lucide Icons |
 | **Backend** | Python, Flask, Flask-JWT-Extended, Flask-Bcrypt |
 | **Database** | MySQL |
@@ -35,22 +35,32 @@
 
 ---
 
-##System Architecture
+## 🏛️ System Architecture
 
-User
-   │
-React Frontend
-   │
-REST API (Flask)
-   │
- ├── NLP Engine
- ├── Safety Engine
- ├── Recommendation Engine
- └── ML Prediction Engine
-        │
-   Random Forest Model
-        │
-      MySQL Database
+```text
+                    User
+                      │
+                      ▼
+              React Frontend
+                      │
+          HTTP/REST API Requests
+                      │
+                      ▼
+              Flask REST API
+                      │
+        ┌─────────────┼─────────────┐
+        │             │             │
+        ▼             ▼             ▼
+  NLP Engine    Safety Engine  Recommendation Engine
+        │             │             │
+        └─────────────┼─────────────┘
+                      │
+                      ▼
+          ML Prediction Engine
+          (Random Forest Model)
+                      │
+                      ▼
+               MySQL Database
 
 ## 📂 Project Structure
 
