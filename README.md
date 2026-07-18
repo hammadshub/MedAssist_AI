@@ -35,6 +35,23 @@
 
 ---
 
+##System Architecture
+
+User
+   │
+React Frontend
+   │
+REST API (Flask)
+   │
+ ├── NLP Engine
+ ├── Safety Engine
+ ├── Recommendation Engine
+ └── ML Prediction Engine
+        │
+   Random Forest Model
+        │
+      MySQL Database
+
 ## 📂 Project Structure
 
 ```
