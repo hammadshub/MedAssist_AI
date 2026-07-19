@@ -61,6 +61,19 @@
                       │
                       ▼
                MySQL Database
+```
+
+### Workflow
+
+1. User enters symptoms through the React frontend.
+2. Flask REST API processes the request.
+3. The NLP Engine extracts structured symptoms from free-text input.
+4. The Safety Engine checks for emergency symptom combinations.
+5. The ML Prediction Engine predicts the top probable diseases.
+6. The Recommendation Engine generates medical recommendations.
+7. Results are stored in MySQL and returned to the frontend.
+
+---
 
 ## 📂 Project Structure
 
